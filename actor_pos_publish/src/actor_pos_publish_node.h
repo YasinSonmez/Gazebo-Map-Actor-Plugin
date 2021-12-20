@@ -23,14 +23,12 @@ class ActorPosPublishNode
 private:
   // Callbacks
   void modelStatesCallback(const gazebo_msgs::ModelStates::ConstPtr &model_states);
-  void odomCallback(const nav_msgs::Odometry::ConstPtr &odom_msg);
   void costmapCallback(const nav_msgs::OccupancyGrid::ConstPtr &costmap_msg);
 
   ros::NodeHandle nh;
 
   // Subscribers
   ros::Subscriber modelStates_sub;
-  ros::Subscriber odom_sub;
   ros::Subscriber costmap_sub;
 
   // Publishers
@@ -49,10 +47,7 @@ private:
   nav_msgs::Path planned_path1;
   nav_msgs::Path planned_path2;
 
-  nav_msgs::Odometry odom;
   nav_msgs::OccupancyGrid costmap;
-  geometry_msgs::PoseStamped odom_in_map_frame;
-  geometry_msgs::TransformStamped odom_to_map;
   tf2_ros::Buffer tf_buffer;
   bool actor_message_arrived = false;
   std::vector<geometry_msgs::PoseStamped> plan;

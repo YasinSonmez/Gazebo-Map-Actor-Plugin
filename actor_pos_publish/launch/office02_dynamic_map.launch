@@ -19,18 +19,18 @@
   <arg name="initial_pose_a" default="1.5708"/>
 
   <!-- Filename -->
-  <arg name="log_filename" default="$(find move_base_benchmark)/launch/log.txt" />
-  <arg name="map_filename" default="$(find move_base_benchmark)/maps/office02/map.yaml" />
+  <arg name="log_filename" default="$(find actor_pos_publish)/launch/log.txt" />
+  <arg name="map_filename" default="$(find actor_pos_publish)/maps/office02/map.yaml" />
   <arg name="world_filename" default="$(find gazebo_world)/world/office02_dynamic_map.world" />
   <arg name="global_frame" value="map" />
 
   <!--  ************** Navigation ***************  -->
-  <node pkg="move_base_benchmark" type="move_base_benchmark" respawn="false" name="move_base_benchmark" output="screen">
-    <rosparam file="$(find move_base_benchmark)/params/costmap_common_params.yaml" command="load" ns="global_costmap" />
-    <rosparam file="$(find move_base_benchmark)/params/costmap_common_params.yaml" command="load" ns="local_costmap" />
-    <rosparam file="$(find move_base_benchmark)/params/global_costmap_params.yaml" command="load" />
-    <rosparam file="$(find move_base_benchmark)/params/local_costmap_params.yaml" command="load" />
-    <rosparam file="$(find move_base_benchmark)/params/teb_local_planner_params.yaml" command="load" />
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find actor_pos_publish)/params/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find actor_pos_publish)/params/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find actor_pos_publish)/params/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find actor_pos_publish)/params/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find actor_pos_publish)/params/teb_local_planner_params.yaml" command="load" />
     <param name="global_costmap/global_frame" value="$(arg global_frame)" />
     <param name="local_costmap/global_frame" value="$(arg global_frame)" />
 
@@ -71,6 +71,6 @@
   </include>
 
   <!--  **************** Visualisation ****************  -->
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find move_base_benchmark)/launch/rviz_navigation.rviz"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find actor_pos_publish)/launch/rviz_navigation.rviz"/>
 
 </launch>

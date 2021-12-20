@@ -4,8 +4,7 @@ ActorPosPublishNode::ActorPosPublishNode()
 {
 	// Subscribers
 	modelStates_sub = nh.subscribe("/gazebo/model_states", 1, &ActorPosPublishNode::modelStatesCallback, this);
-	odom_sub = nh.subscribe("/RosAria/odom", 1, &ActorPosPublishNode::odomCallback, this);
-	costmap_sub = nh.subscribe("/move_base_benchmark/global_costmap/costmap",
+	costmap_sub = nh.subscribe("/move_base/global_costmap/costmap",
 							   1, &ActorPosPublishNode::costmapCallback, this);
 
 	// Publishers
@@ -37,20 +36,6 @@ int mapToCostmapIdx(double x, double y, int width, int height, double resolution
 
 /****************************************CALLBACKS***********************************************
 ************************************************************************************************/
-
-void ActorPosPublishNode::odomCallback(const nav_msgs::Odometry::ConstPtr &odom_msg)
-{
-	odom = *odom_msg;
-	odom_in_map_frame.header = odom.header;
-	odom_in_map_frame.pose = odom.pose.pose;
-
-	tf2_ros::TransformListener tf2_listener(tf_buffer);
-	if (tf_buffer.canTransform("map", "odom", ros::Time(0), ros::Duration(2.0)))
-	{
-		odom_to_map = tf_buffer.lookupTransform("map", "odom", ros::Time(0), ros::Duration(1.0));
-		tf2::doTransform(odom_in_map_frame, odom_in_map_frame, odom_to_map);
-	}
-}
 
 void ActorPosPublishNode::costmapCallback(const nav_msgs::OccupancyGrid::ConstPtr &costmap_msg)
 {
