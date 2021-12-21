@@ -9,7 +9,10 @@ The actors start walking around randomly without keeping the obstacles in mind. 
 5. Each actor plugin subscribes to this topic and tries to follow that path
 
 
-https://user-images.githubusercontent.com/37510173/146838120-cf74c76e-8654-48c0-b2c1-425c3fa26da6.mp4
+
+https://user-images.githubusercontent.com/37510173/146939479-461cbed3-16f5-4ebe-8e87-fb14f64ad258.mp4
+
+
 
 There are two packages in the repo, the actor_move folder is for the gazebo plugin for the actors and the actor_pos_publish folder is for the package that computes the paths of the actors and publishes them.
 
@@ -50,3 +53,8 @@ roslaunch actor_pos_publish office02_dynamic_map.launch
 rosrun actor_pos_publish actor_pos_publish_node
 ```
 3. Now you should see the actors planning using the map in rviz
+
+# References
+1. https://github.com/bach05/gazebo-plugin-autonomous-actor
+2. https://github.com/NKU-MobFly-Robotics/local-planning-benchmark
+3. https://github.com/NKU-MobFly-Robotics/p3dx
