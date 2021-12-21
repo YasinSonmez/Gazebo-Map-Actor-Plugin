@@ -1,4 +1,4 @@
-#include "plan_utils.h"
+#include "A_star.h"
 using namespace std;
 
 // Convert a map index to corresponding coordinate

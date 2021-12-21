@@ -12,7 +12,7 @@
 #include <std_msgs/String.h>
 #include <time.h>
 #include <costmap_2d/costmap_2d_ros.h>
-#include "plan_utils.h"
+#include "A_star.h"
 
 using namespace std;
 
