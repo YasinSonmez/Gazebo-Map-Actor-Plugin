@@ -11982,7 +11982,7 @@
       </camera>
     </gui>
 
-    <actor name="actor1">
+    <actor name="actor0">
       <pose>0 1 1.25 0 0 0</pose>
       <skin>
         <filename>walk.dae</filename>
@@ -11994,13 +11994,13 @@
         <interpolate_x>true</interpolate_x>
       </animation>
 
-      <plugin name="actor1_plugin" filename="libMapActorPlugin.so">
+      <plugin name="actor0_plugin" filename="libMapActorPlugin.so">
         <target>0 -5 1.2138</target>
         <animation_factor>5.1</animation_factor>
       </plugin>
     </actor>
 
-    <actor name="actor2">
+    <actor name="actor1">
       <pose>-2 -2 1.25 0 0 0</pose>
       <skin>
         <filename>walk.dae</filename>
@@ -12012,8 +12012,62 @@
         <interpolate_x>true</interpolate_x>
       </animation>
 
-      <plugin name="actor2_plugin" filename="libMapActorPlugin.so">
+      <plugin name="actor1_plugin" filename="libMapActorPlugin.so">
         <target>0 5 1.2138</target>
+        <animation_factor>5.1</animation_factor>
+      </plugin>
+    </actor>
+
+     <actor name="actor2">
+      <pose>4 -2 1.25 0 0 0</pose>
+      <skin>
+        <filename>walk.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <animation name="walking">
+        <filename>walk.dae</filename>
+        <scale>1.000000</scale>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+
+      <plugin name="actor2_plugin" filename="libMapActorPlugin.so">
+        <target>2 5 1.2138</target>
+        <animation_factor>5.1</animation_factor>
+      </plugin>
+    </actor>
+
+    <actor name="actor3">
+      <pose>4 2 1.25 0 0 0</pose>
+      <skin>
+        <filename>walk.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <animation name="walking">
+        <filename>walk.dae</filename>
+        <scale>1.000000</scale>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+
+      <plugin name="actor3_plugin" filename="libMapActorPlugin.so">
+        <target>-4 5 1.2138</target>
+        <animation_factor>5.1</animation_factor>
+      </plugin>
+    </actor>
+
+    <actor name="actor4">
+      <pose>4 3 1.25 0 0 0</pose>
+      <skin>
+        <filename>walk.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <animation name="walking">
+        <filename>walk.dae</filename>
+        <scale>1.000000</scale>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+
+      <plugin name="actor4_plugin" filename="libMapActorPlugin.so">
+        <target>-2 -5 1.2138</target>
         <animation_factor>5.1</animation_factor>
       </plugin>
     </actor>

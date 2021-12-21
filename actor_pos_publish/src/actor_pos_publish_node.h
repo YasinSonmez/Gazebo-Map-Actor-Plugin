@@ -32,25 +32,21 @@ private:
   ros::Subscriber costmap_sub;
 
   // Publishers
-  ros::Publisher actor1_target_pos_pub;
-  ros::Publisher actor2_target_pos_pub;
+  std::vector<ros::Publisher> actor_target_pos_pubs;
 
   // Variables
   int height;
   int width;
-  geometry_msgs::Point goal1;
-  geometry_msgs::Point goal2;
-  nav_msgs::Path actor1_path;
-  nav_msgs::Path actor2_path;
-  geometry_msgs::PoseStamped actor1_pose;
-  geometry_msgs::PoseStamped actor2_pose;
-  nav_msgs::Path planned_path1;
-  nav_msgs::Path planned_path2;
+  int num_of_actors = 0;
+
+  std::vector<int> actor_idxs;
+  std::vector<geometry_msgs::Point> actor_poses;
+  std::vector<nav_msgs::Path> actor_paths;
+
+  std::vector<pair<int, int>> goals;
 
   nav_msgs::OccupancyGrid costmap;
-  tf2_ros::Buffer tf_buffer;
   bool actor_message_arrived = false;
-  std::vector<geometry_msgs::PoseStamped> plan;
 
   ros::Time begin;
 

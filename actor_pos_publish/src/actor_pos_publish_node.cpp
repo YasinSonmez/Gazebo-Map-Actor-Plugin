@@ -6,10 +6,6 @@ ActorPosPublishNode::ActorPosPublishNode()
 	modelStates_sub = nh.subscribe("/gazebo/model_states", 1, &ActorPosPublishNode::modelStatesCallback, this);
 	costmap_sub = nh.subscribe("/move_base/global_costmap/costmap",
 							   1, &ActorPosPublishNode::costmapCallback, this);
-
-	// Publishers
-	actor1_target_pos_pub = nh.advertise<nav_msgs::Path>("/actor1/target", 100);
-	actor2_target_pos_pub = nh.advertise<nav_msgs::Path>("/actor2/target", 100);
 }
 
 /****************************************FUNCTIONS***********************************************
@@ -26,12 +22,17 @@ int getIndex(std::vector<std::string> v, std::string value)
 	return -1;
 }
 
-// Takes a coordinate in map frame and transforms into idx corresponding in global costmap
-int mapToCostmapIdx(double x, double y, int width, int height, double resolution)
+// Find the number of the actors in the scene (this is necessary for publishing purposes)
+int getNumofActors(std::vector<std::string> v)
 {
-	int a = (int)(y / resolution + (double)height / 2.0);
-	int b = (int)(x / resolution + (double)width / 2.0);
-	return a * width + b;
+	int n = 0;
+	for (int i = 0; i < v.size(); i++)
+	{
+		// Actor name convention must be {actor0, actor1, actor2 ...}
+		if (v[i].compare(0, 5, "actor") == 0)
+			n++;
+	}
+	return n;
 }
 
 /****************************************CALLBACKS***********************************************
@@ -46,14 +47,26 @@ void ActorPosPublishNode::costmapCallback(const nav_msgs::OccupancyGrid::ConstPt
 
 void ActorPosPublishNode::modelStatesCallback(const gazebo_msgs::ModelStates::ConstPtr &model_states)
 {
-	int actor1_index = getIndex(model_states->name, "actor1");
-	int actor2_index = getIndex(model_states->name, "actor2");
+	// If this is the first time we received model_states message then we
+	// need to find the number of actors, then using push_back function we can
+	// indicate the size of the vectors we will use
+	if (!actor_message_arrived)
+	{
+		// Find the number of actors that we need to control, iterate over them
+		num_of_actors = getNumofActors(model_states->name);
+		for (int i = 0; i < num_of_actors; i++)
+		{
+			// Find the actor idxs provided by model_states corresponding to each actor
+			actor_idxs.push_back(getIndex(model_states->name, "actor" + std::to_string(i)));
+			// Find the position of each actor in map frame
+			actor_poses.push_back(model_states->pose[actor_idxs[i]].position);
+		}
+		actor_message_arrived = true;
+	}
 
-	// Set the position
-	actor1_pose.pose.position = model_states->pose[actor1_index].position;
-	actor2_pose.pose.position = model_states->pose[actor2_index].position;
-
-	actor_message_arrived = true;
+	// Set the position of each actor pose if not the first time
+	for (int i = 0; i < num_of_actors; i++)
+		actor_poses[i] = model_states->pose[actor_idxs[i]].position;
 }
 
 /****************************************MAIN LOOP***********************************************
@@ -63,46 +76,72 @@ void ActorPosPublishNode::mainLoop()
 	// Check if the target position message is arrived
 	if (actor_message_arrived)
 	{
-		// A star
-		// geometry_msgs::Point start1(actor1_pose.pose.position.x, actor1_pose.pose.position.y);
-		// geometry_msgs::Point start2(actor2_pose.pose.position.x, actor2_pose.pose.position.y);
+		// Find the maximum possible distance from the actor we will generate targets to
+		int max_len = (int)(7.0 / costmap.info.resolution);
 
-		geometry_msgs::Point start1 = actor1_pose.pose.position;
-		geometry_msgs::Point start2 = actor2_pose.pose.position;
-
-		long unsigned n1 = planned_path1.poses.size();
-		long unsigned n2 = planned_path2.poses.size();
-
-		if (n1 < 10)
+		// Iterate over each actor to find the paths independently
+		for (int i = 0; i < num_of_actors; i++)
 		{
-			while (1)
+			// Find the index on the map corresponding to actor's position
+			pair<int, int> init_idx = map_to_idx(
+				actor_poses[i].x, actor_poses[i].y,
+				costmap.info.width, costmap.info.height,
+				costmap.info.origin.position.x, costmap.info.origin.position.y,
+				costmap.info.resolution);
+
+			// Determine whether to generate a new target. We will generate a new
+			// target if it's the first time, there are less than 10 elements in
+			// our path, or the generated path is over 200 elements(more computation)
+			long unsigned n;
+			if (actor_paths.size() == i)
+				n = 0;
+			else
+				n = actor_paths[i].poses.size();
+
+			if (n < 10 || n > 200)
 			{
-				goal1.x = rand() % width;
-				goal1.y = rand() % height;
+				// Iterate until a viable point is found
+				while (1)
+				{
+					// Generate random targets close by the actor
+					int x_idx = (init_idx.first - max_len / 2 + rand() % max_len) % width;
+					int y_idx = (init_idx.second - max_len / 2 + rand() % max_len) % height;
 
-				if (costmap.data[goal1.x * width + (width - 1 - goal1.y)] == 0)
-					break;
+					// Find how distant the point is from the actor, if less than max_len
+					// and the costmap value corresponding to target is 0, proceed
+					int difference = abs(init_idx.first - x_idx) + abs(init_idx.second - y_idx);
+					if ((difference < max_len) && (costmap.data[x_idx * width + (width - 1 - y_idx)] == 0))
+					{
+						// If goals doesn't have enough values, push back. Otherwise, set the value
+						if (goals.size() == i)
+						{
+							pair<int, int> temp;
+							temp.first = x_idx;
+							temp.second = y_idx;
+							goals.push_back(temp);
+						}
+						else
+						{
+							goals[i].first = x_idx;
+							goals[i].second = y_idx;
+						}
+						break;
+					}
+				}
 			}
+			// If actor_paths doesn't have enough values, push back. Otherwise, set the value
+			if (actor_paths.size() == i)
+				actor_paths.push_back(a_star(init_idx, goals[i], costmap));
+			else
+				actor_paths[i] = a_star(init_idx, goals[i], costmap);
+
+			// If actor_target_pos_pubs doesn't have enough values, push back. Otherwise, publish
+			if (actor_target_pos_pubs.size() == i)
+				actor_target_pos_pubs.push_back(nh.advertise<nav_msgs::Path>("/actor" + std::to_string(i) + "/target", 10));
+			// Publish the target
+			else
+				actor_target_pos_pubs[i].publish(actor_paths[i]);
 		}
-		planned_path1 = a_star(start1, goal1, costmap);
-
-		if (n2 < 10)
-		{
-			while (1)
-			{
-				goal2.x = rand() % width;
-				goal2.y = rand() % height;
-
-				if (costmap.data[goal2.x * width + (width - 1 - goal2.y)] == 0)
-					break;
-			}
-		}
-		planned_path2 = a_star(start2, goal2, costmap);
-
-		// Publish the target
-		actor1_target_pos_pub.publish(planned_path1);
-		actor2_target_pos_pub.publish(planned_path2);
-		// std::cout << plan.x << " " << plan.y << std::endl;
 	}
 }
 int main(int argc, char **argv)
@@ -111,7 +150,7 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "actor_pos_publish");
 
 	ActorPosPublishNode node;
-	ros::Rate loop_rate(20);
+	ros::Rate loop_rate(5);
 
 	while (ros::ok())
 	{

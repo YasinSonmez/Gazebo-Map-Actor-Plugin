@@ -119,6 +119,7 @@ void gazebo::MapActorPlugin::Reset()
 void gazebo::MapActorPlugin::ChooseNewTarget()
 {
   ignition::math::Vector3d newTarget(this->target);
+  // If the path hasn't arrived choose random targets
   if (!path_arrived)
   {
     while ((newTarget - this->target).Length() < 2.0)
@@ -137,13 +138,14 @@ void gazebo::MapActorPlugin::ChooseNewTarget()
       }
     }
   }
+  // If the path arrived follow it
   else
   {
     int path_length = (int)this->actor_path.poses.size();
-    int n = std::max(path_length, 10);
-    newTarget.X(this->actor_path.poses[n - 10].pose.position.x);
-    newTarget.Y(this->actor_path.poses[n - 10].pose.position.y);
-    // ROS_INFO("X: %f  Y: %f N: %d", this->actor_path.poses[n - 10].pose.position.x, this->actor_path.poses[n - 10].pose.position.y, path_length);
+    int n = std::max(path_length, 50);
+    // Follow the every 50th position of the path
+    newTarget.X(this->actor_path.poses[n - 50].pose.position.x);
+    newTarget.Y(this->actor_path.poses[n - 50].pose.position.y);
   }
   this->target = newTarget;
 }
@@ -166,8 +168,7 @@ void gazebo::MapActorPlugin::OnUpdate(const common::UpdateInfo &_info)
     pos = this->target - pose.Pos();
   }
 
-  // Normalize the direction vector, and apply the target weight
-  // pos = pos.Normalize() * this->targetWeight;
+  // Normalize the direction vector
   pos = pos.Normalize();
 
   // Compute the yaw orientation
