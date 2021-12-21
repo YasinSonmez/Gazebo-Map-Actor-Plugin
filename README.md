@@ -34,7 +34,7 @@ Subscribes to:
 ## 0. Important Files
 1. [Actor plugin](https://github.com/YasinSonmez/Gazebo-Map-Actor-Plugin/blob/main/actor_move/MapActorPlugin.cc)
 2. [Actor Positon Publisher Node](https://github.com/YasinSonmez/Gazebo-Map-Actor-Plugin/blob/main/actor_pos_publish/src/actor_pos_publish_node.cpp)
-3. [A* Algorithm Implementation](https://github.com/YasinSonmez/Gazebo-Map-Actor-Plugin/blob/main/actor_pos_publish/src/plan_utils.cpp)
+3. [A* Algorithm Implementation](https://github.com/YasinSonmez/Gazebo-Map-Actor-Plugin/blob/main/actor_pos_publish/src/A_star.cpp)
 ## 1. Setup
 ### 1.1 Actor Move Plugin
 To build the gazebo plugin please follow the following steps. From the actor_move directory:
