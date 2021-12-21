@@ -75,7 +75,7 @@ void gazebo::MapActorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
 void gazebo::MapActorPlugin::OnRosMsg(const nav_msgs::PathConstPtr &_msg)
 {
   this->actor_path = *_msg;
-  path_arrived = true;
+  path_arrived++;
 }
 
 /// \brief ROS helper function that processes messages
@@ -162,7 +162,7 @@ void gazebo::MapActorPlugin::OnUpdate(const common::UpdateInfo &_info)
   double distance = pos.Length();
 
   // Choose a new target position if the actor has reached its current target.
-  if (distance < 0.01)
+  if (distance < 0.01 || path_arrived == 1)
   {
     this->ChooseNewTarget();
     pos = this->target - pose.Pos();

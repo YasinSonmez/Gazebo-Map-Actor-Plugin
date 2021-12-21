@@ -124,9 +124,9 @@ namespace gazebo
     /// \brief Path of the actor
     nav_msgs::Path actor_path;
 
-    /// \brief Whether the map arrived so far
+    /// \brief How many times the map arrived so far
   public:
-    bool path_arrived = false;
+    int path_arrived = 0;
 
     /// \brief A ROS callbackqueue that helps process messages
   private:
