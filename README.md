@@ -45,8 +45,48 @@ $ cmake ../
 $ make
 ```
 After that, a library named "libMapActorPlugin.so" will be generated in the build directory. Please update the reference path of "libMapActorPlugin.so" in the xxx_dynamic.world files in the gazebo_world/world directory before you use the dynamic world models. For example, open office02_dynamic.world and use "ctrl+F" to find "libMapActorPlugin.so". Then, replace the value of "filename" with the absolute path of "libMapActorPlugin.so" in your build directory of actor_move. Each animated actor needs to call this plugin. Therefore, please check all the reference paths of this plugin in the dynamic world models.
+## 2. Using the Plugin Inside a .world file
+Using the plugin from a world file is straightforward, but needs attention because the actor names need to comply with the following convention : {actor0, actor1, actor2 ...}, otherwise the position publisher node won't work as expected. To include the plugin add as many actors as you want similar to the following script to your .world file:
 
-## 2. Using Actor Position Publisher Node
+```
+    <actor name="actor0">
+      <pose>0 1 1.25 0 0 0</pose>
+      <skin>
+        <filename>walk.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <animation name="walking">
+        <filename>walk.dae</filename>
+        <scale>1.000000</scale>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+
+      <plugin name="actor0_plugin" filename="libMapActorPlugin.so">
+        <target>0 -5 1.2138</target>
+        <animation_factor>5.1</animation_factor>
+      </plugin>
+    </actor>
+
+    <actor name="actor1">
+      <pose>-2 -2 1.25 0 0 0</pose>
+      <skin>
+        <filename>walk.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <animation name="walking">
+        <filename>walk.dae</filename>
+        <scale>1.000000</scale>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+
+      <plugin name="actor1_plugin" filename="libMapActorPlugin.so">
+        <target>0 5 1.2138</target>
+        <animation_factor>5.1</animation_factor>
+      </plugin>
+    </actor>
+```
+
+## 3. Using Actor Position Publisher Node
 1. Launch your .launch file or the example .launch file from actor_pos_publish/launch directory:
 ```
 roslaunch actor_pos_publish office02_dynamic_map.launch
